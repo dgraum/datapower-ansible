@@ -73,7 +73,7 @@ Documentation
 The documentation is in development, however you can use ansible-doc to review the progress.
 
 ```shell
-ansible-doc -M library/modules/appliance/ibm/idg_domain
+ansible-doc -M library/modules/appliance/ibm/ idg_domain
 ```
 
 License

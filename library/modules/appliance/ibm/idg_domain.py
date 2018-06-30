@@ -310,18 +310,22 @@ EXAMPLES = '''
 '''
 
 RETURN = '''
-monitor_type:
+name:
   description:
-    - Changed value for the monitor_type of the node.
+    - The name of the domain that is being worked on.
   returned: changed and success
   type: string
-  sample: m_of_n
-quorum:
+  sample:
+    - core-security-wrap
+    - DevWSOrchestration
+msg:
   description:
-    - Changed value for the quorum of the node.
-  returned: changed and success
-  type: int
-  sample: 1
+    - Message returned by the device API.
+  returned: always
+  type: string
+  sample:
+    - Configuration was created.
+    - Unknown error for (https://idg-host1:5554/mgmt/domains/config/). <urlopen error timed out>
 '''
 
 import json

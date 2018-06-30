@@ -36,25 +36,25 @@ conf; web-mgmt; admin-state enabled; exit; rest-mgmt; admin-state enabled; exit;
 
 3. Clone our repository:
 
-```
+```shell
 git clone https://github.com/dgraum/datapower-ansible.git
 ```
 
 4. Switch to the repository:
 
-```
+```shell
 cd datapower-ansible
 ```
 
 5. Modify the necessary connection parameters:
 
-```
+```shell
 vi examples/domain/idg-connection.yml
 ```
 
 6. Enjoy :blush:
 
-```
+```shell
 ansible-playbook examples/domain/create.yml -e "domain_name = test"
 ansible-playbook examples/domain/quiesce.yml -e "domain_name = test"
 ansible-playbook examples/domain/reset.yml -e "domain_name = test"
@@ -72,7 +72,7 @@ Documentation
 
 The documentation is in development, however you can use ansible-doc to review the progress.
 
-```
+```shell
 ansible-doc -M library/modules/appliance/ibm/idg_domain
 ```
 

@@ -26,7 +26,7 @@ Usage
 
 To test our modules, be sure to:
 
-1. (Ansible installed)(https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html)
+1. [Ansible installed](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html)
 
 2. Access to the [REST Management Interface](https://www.ibm.com/support/knowledgecenter/en/SS9H2Y_7.6.0/com.ibm.dp.doc/restmgtinterface.html) of an IDG. An excellent and fast alternative is the [IBM DataPower Gateway for Docker](https://hub.docker.com/r/ibmcom/datapower/). The following sequence of commands will configure by default the necessary services in the IDG:
 

@@ -31,7 +31,7 @@ To test our modules, be sure to:
 2. Access to the [REST Management Interface](https://www.ibm.com/support/knowledgecenter/en/SS9H2Y_7.6.0/com.ibm.dp.doc/restmgtinterface.html) of an IDG. An excellent and fast alternative is the [IBM DataPower Gateway for Docker](https://hub.docker.com/r/ibmcom/datapower/). The following sequence of commands will configure by default the necessary services in the IDG:
 
 ```
-conf; web-mgmt; admin-state enabled; exit; rest-mgmt; admin-state enabled; exit;
+conf; web-mgmt; admin-state enabled; exit; rest-mgmt; admin-state enabled; exit; exit;
 ```
 
 3. Clone our repository:
@@ -55,14 +55,14 @@ vi examples/domain/idg-connection.yml
 6. Enjoy :blush:
 
 ```shell
-ansible-playbook examples/domain/create.yml -e "domain_name = test"
-ansible-playbook examples/domain/quiesce.yml -e "domain_name = test"
-ansible-playbook examples/domain/reset.yml -e "domain_name = test"
-ansible-playbook examples/domain/unquiesce.yml -e "domain_name = test"
-ansible-playbook examples/domain/save.yml -e "domain_name = default"
-ansible-playbook examples/domain/restart.yml -e "domain_name = test"
-ansible-playbook examples/domain/remove.yml -e "domain_name = test"
-ansible-playbook examples/domain/save.yml -e "domain_name = default"
+ansible-playbook examples/domain/create.yml -e "domain_name=test"
+ansible-playbook examples/domain/quiesce.yml -e "domain_name=test"
+ansible-playbook examples/domain/reset.yml -e "domain_name=test"
+ansible-playbook examples/domain/unquiesce.yml -e "domain_name=test"
+ansible-playbook examples/domain/save.yml -e "domain_name=default"
+ansible-playbook examples/domain/restart.yml -e "domain_name=test"
+ansible-playbook examples/domain/remove.yml -e "domain_name=test"
+ansible-playbook examples/domain/save.yml -e "domain_name=default"
 ansible-playbook examples/domain/create-multiple.yml
 ansible-playbook examples/domain/remove-multiple.yml
 ```

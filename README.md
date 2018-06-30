@@ -13,7 +13,7 @@ The IDG modules for Ansible are freely provided to the open source community for
 Your ideas
 ----------
 
-**We are very interested in your ideas!!!***
+**We are very interested in your ideas!!!**
 
 Please present us any error, question or request for improvement. What modules do you want created?, In what order? 
 If you have a use case and can sufficiently describe the behavior you want to see, open an issue and we will hammer out the details.

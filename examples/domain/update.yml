@@ -1,0 +1,35 @@
+---
+
+- name: Test DataPower domain module (update)
+  connection: local
+  hosts: localhost
+
+  tasks:
+
+  - name: Include connection data
+    include_vars:
+        file: idg-connection.yml
+        name: remote_idg
+
+  - name: Update domain
+    idg_domain:
+        name: "{{ domain_name }}"
+        idg_connection: "{{ remote_idg }}"
+        file_map: "{{ file_definition }}"
+        user_summary: Hecho con Ansible!!!
+        state: present
+    vars:
+        file_definition:
+            display: false
+            exec: true
+            copyfrom: true
+            copyto: true
+            delete: false
+            subdir: true
+    register: update_domain_out
+
+  - name: Dump update output
+    debug:
+        var: update_domain_out
+
+...

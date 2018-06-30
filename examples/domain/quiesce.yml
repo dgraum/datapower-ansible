@@ -1,0 +1,28 @@
+---
+
+- name: Test DataPower domain module (quiesce)
+  connection: local
+  hosts: localhost
+
+  tasks:
+
+  - name: Include connection data
+    include_vars:
+        file: idg-connection.yml
+        name: remote_idg
+
+  - name: Quiesce domain
+    idg_domain:
+        name: "{{ domain_name }}"
+        idg_connection: "{{ remote_idg }}"
+        state: quiesced
+        quiesce_conf:
+            delay: 10
+            timeout: 61
+    register: quiesce_domain_out
+
+  - name: Dump quiesce output
+    debug:
+        var: quiesce_domain_out
+
+...

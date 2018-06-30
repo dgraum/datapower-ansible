@@ -1,0 +1,8 @@
+---
+
+server: n2.dgrau.lab.mx
+server_port: 5554
+user: admin
+password: admin
+validate_certs: false
+timeout: 15

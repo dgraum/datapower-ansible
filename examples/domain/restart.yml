@@ -1,0 +1,25 @@
+---
+
+- name: Test DataPower domain module (restart)
+  connection: local
+  hosts: localhost
+
+  tasks:
+
+  - name: Include connection data
+    include_vars:
+        file: idg-connection.yml
+        name: remote_idg
+
+  - name: Restart domain
+    idg_domain:
+        name: "{{ domain_name }}"
+        idg_connection: "{{ remote_idg }}"
+        state: restarted
+    register: restart_domain_out
+
+  - name: Dump restart output
+    debug:
+        var: restart_domain_out
+
+...

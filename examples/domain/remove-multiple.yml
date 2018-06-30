@@ -1,0 +1,29 @@
+---
+
+- name: Test DataPower domain module (remove)
+  connection: local
+  hosts: localhost
+
+  tasks:
+
+  - name: Include connection data
+    include_vars:
+        file: idg-connection.yml
+        name: remote_idg
+
+  - name: Remove multiple domain
+    idg_domain:
+        name: "test-{{ item }}"
+        idg_connection: "{{ remote_idg }}"
+        user_summary: "Dominio {{ item }} de {{ total }}"
+        state: absent
+    with_sequence: start=1 end={{ total | int }}
+    register: remove_domain_out
+    vars:
+        total: 20
+
+  - name: Dump remove multiple output
+    debug:
+        var: remove_domain_out
+
+...

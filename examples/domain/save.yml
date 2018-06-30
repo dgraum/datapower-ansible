@@ -1,0 +1,25 @@
+---
+
+- name: Test DataPower domain module (save)
+  connection: local
+  hosts: localhost
+
+  tasks:
+
+  - name: Include connection data
+    include_vars:
+        file: idg-connection.yml
+        name: remote_idg
+
+  - name: Save domain
+    idg_domain:
+        name: "{{ domain_name }}"
+        idg_connection: "{{ remote_idg }}"
+        state: saved
+    register: save_out
+
+  - name: Dump save output
+    debug:
+        var: save_out
+
+...

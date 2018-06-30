@@ -1,0 +1,26 @@
+---
+
+- name: Test DataPower domain module (create)
+  connection: local
+  hosts: localhost
+
+  tasks:
+
+  - name: Include connection data
+    include_vars:
+        file: idg-connection.yml
+        name: remote_idg
+
+  - name: Create domain
+    idg_domain:
+        name: "{{ domain_name }}"
+        idg_connection: "{{ remote_idg }}"
+        user_summary: Hecho con Ansible!!!
+        state: present
+    register: create_domain_out
+
+  - name: Dump create output
+    debug:
+        var: create_domain_out
+
+...

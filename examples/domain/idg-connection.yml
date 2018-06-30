@@ -1,6 +1,6 @@
 ---
 
-server: n2.dgrau.lab.mx
+server: idg-host # IDG IP or host name
 server_port: 5554
 user: admin
 password: admin

@@ -50,10 +50,11 @@ cd datapower-ansible
 
     Domains in DataPowers are very versatile. To make it easier to use, we created two modules:
 
-        1) Focused on the management of domains as logical partition(structure) that group, asylate and organize a variety of services and configurations.
-           We call this module: `idg_domain` and it offers the functionalities like: create, delete, enable, quiesce and restart the domains
-        2) Another module that we call `idg_domain_config` specialized in the management of the configuration(operation).
-           Here you will find actions such as: save, export, import and reset.
+    1) Focused on the management of domains as logical partition(structure) that group, asylate and organize a variety of services and configurations.
+       We call this module: `idg_domain` and it offers the functionalities like: create, delete, enable, quiesce and restart the domains
+
+    2) Another module that we call `idg_domain_config` specialized in the management of the configuration(operation).
+       Here you will find actions such as: save, export, import and reset.
 
 6. Configure the connection parameters:
 

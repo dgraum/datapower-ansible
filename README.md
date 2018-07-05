@@ -46,27 +46,50 @@ git clone https://github.com/dgraum/datapower-ansible.git
 cd datapower-ansible
 ```
 
-5. Modify the necessary connection parameters:
+5. ¿How does it work?
+
+    Domains in DataPowers are very versatile. To make it easier to use, we created two modules:
+
+        1) Focused on the management of domains as logical partition(structure) that group, asylate and organize a variety of services and configurations.
+           We call this module: `idg_domain` and it offers the functionalities like: create, delete, enable, quiesce and restart the domains
+        2) Another module that we call `idg_domain_config` specialized in the management of the configuration(operation).
+           Here you will find actions such as: save, export, import and reset.
+
+6. Configure the connection parameters:
+
+    We have two sets of playbooks, one for each module. Please modify the connection variables in both.
 
 ```shell
 vi examples/domain/idg-connection.yml
+cp examples/domain/idg-connection.yml examples/domain/idg-connection.yml
 ```
 
-6. Enjoy :blush:
+7. Enjoy :blush:
+
+Module `idg_domain`
 
 ```shell
 ansible-playbook examples/domain/create.yml -e "domain_name=test"
 ansible-playbook examples/domain/quiesce.yml -e "domain_name=test"
-ansible-playbook examples/domain/reset.yml -e "domain_name=test"
 ansible-playbook examples/domain/unquiesce.yml -e "domain_name=test"
-ansible-playbook examples/domain/save.yml -e "domain_name=default"
 ansible-playbook examples/domain/restart.yml -e "domain_name=test"
+ansible-playbook examples/domain/update.yml -e "domain_name=test"
 ansible-playbook examples/domain/remove.yml -e "domain_name=test"
-ansible-playbook examples/domain/save.yml -e "domain_name=default"
 ansible-playbook examples/domain/create-multiple.yml
 ansible-playbook examples/domain/remove-multiple.yml
 ```
 
+Module `idg_domain_config`
+```shell
+# Environment
+ansible-playbook examples/domain/create.yml -e "domain_name=test1"
+# Configure some simple service
+ansible-playbook examples/domain/create.yml -e "domain_name=test2"
+# Actions over the configuration
+ansible-playbook examples/domain_config/save.yml -e "domain_name=default"
+ansible-playbook examples/domain_config/export-import.yml -e "origin=test destination=test1"
+ansible-playbook examples/domain_config/reset.yml -e "domain_name=test1"
+```
 Documentation
 -------------
 

@@ -12,7 +12,7 @@
         name: remote_idg
 
   - name: Save domain
-    idg_domain:
+    idg_domain_config:
         name: "{{ domain_name }}"
         idg_connection: "{{ remote_idg }}"
         state: saved

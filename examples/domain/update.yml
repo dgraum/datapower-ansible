@@ -20,7 +20,7 @@
         state: present
     vars:
         file_definition:
-            display: false
+            display: true
             exec: true
             copyfrom: true
             copyto: true

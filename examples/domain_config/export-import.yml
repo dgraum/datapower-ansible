@@ -1,0 +1,41 @@
+---
+
+- name: Test DataPower domain module (export)
+  connection: local
+  hosts: localhost
+
+  tasks:
+
+  - name: Include connection data
+    include_vars:
+        file: idg-connection.yml
+        name: remote_idg
+
+  - name: Export domain
+    idg_domain_config:
+        name: "{{ origin }}"
+        idg_connection: "{{ remote_idg }}"
+        state: exported
+        all_files: True
+        user_summary: Backup semanal
+    register: export_out
+
+  - name: Dump export output
+    debug:
+        var: export_out['file']
+
+  - name: Import domain
+    idg_domain_config:
+        name: "{{ destination }}"
+        idg_connection: "{{ remote_idg }}"
+        state: imported
+        overwrite_files: True
+        overwrite_objects: True
+        input_file: "{{ export_out['file'] }}"
+    register: import_out
+
+  - name: Dump import output
+    debug:
+        var: import_out
+
+...

@@ -82,15 +82,22 @@ ansible-playbook examples/domain/remove-multiple.yml
 
 Module `idg_domain_config`
 ```shell
-# Environment
+# Configure a simple service in the domain test1. Why not upload some files to the local directory(local:/)
 ansible-playbook examples/domain/create.yml -e "domain_name=test1"
-# Configure some simple service
+
+# Another domain
 ansible-playbook examples/domain/create.yml -e "domain_name=test2"
-# Actions over the configuration
+
+# Save the configuration of the default domain
 ansible-playbook examples/domain_config/save.yml -e "domain_name=default"
-ansible-playbook examples/domain_config/export-import.yml -e "origin=test destination=test1"
+
+# Run and then validate that the domain configuration of test1 has been successfully imported into test2
+ansible-playbook examples/domain_config/export-import.yml -e "origin=test1 destination=test2"
+
+# Remove the configuration of the domain test1. Does not delete files from the local directory
 ansible-playbook examples/domain_config/reset.yml -e "domain_name=test1"
 ```
+
 Documentation
 -------------
 

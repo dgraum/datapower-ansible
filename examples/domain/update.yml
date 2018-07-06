@@ -16,7 +16,7 @@
         name: "{{ domain_name }}"
         idg_connection: "{{ remote_idg }}"
         file_map: "{{ file_definition }}"
-        user_summary: Hecho con Ansible!!!
+        user_summary: Hecho con Ansible y con ganas!!!
         state: present
     vars:
         file_definition:

@@ -105,6 +105,8 @@ The documentation is in development, however you can use ansible-doc to review t
 
 ```shell
 ansible-doc -M library/modules/appliance/ibm/ idg_domain
+ansible-doc -M library/modules/appliance/ibm/ idg_domain_config
+
 ```
 
 License

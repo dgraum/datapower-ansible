@@ -67,6 +67,8 @@ cp examples/domain/idg-connection.yml examples/domain_config/idg-connection.yml
 
 7. Enjoy :blush:
 
+Repeat the executions, The **immutability** of the modules is very important!!!
+
 Module `idg_domain`
 
 ```shell
@@ -82,7 +84,7 @@ ansible-playbook examples/domain/remove-multiple.yml
 
 Module `idg_domain_config`
 ```shell
-# Configure a simple service in the domain test1. Why not upload some files to the local directory(local:/)
+# Configure a few services in test1. Why not, also upload some files to local:/
 ansible-playbook examples/domain/create.yml -e "domain_name=test1"
 
 # Another domain
@@ -91,11 +93,15 @@ ansible-playbook examples/domain/create.yml -e "domain_name=test2"
 # Save the configuration of the default domain
 ansible-playbook examples/domain_config/save.yml -e "domain_name=default"
 
-# Run and then validate that the domain configuration of test1 has been successfully imported into test2
+# Run and validate that the configuration of test1 has been imported into test2
 ansible-playbook examples/domain_config/export-import.yml -e "origin=test1 destination=test2"
 
-# Remove the configuration of the domain test1. Does not delete files from the local directory
+# Remove the configuration of the domain test1.
 ansible-playbook examples/domain_config/reset.yml -e "domain_name=test1"
+
+# Save and restore the services of the new domain
+ansible-playbook examples/domain_config/save.yml -e "domain_name=test2"
+ansible-playbook examples/domain/restart.yml -e "domain_name=test2"
 ```
 
 Documentation

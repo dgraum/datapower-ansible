@@ -1,0 +1,8 @@
+---
+
+server: idg-host # IDG IP or host name
+server_port: 5554
+user: admin
+password: admin
+validate_certs: false
+timeout: 15

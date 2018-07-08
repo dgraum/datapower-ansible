@@ -1,0 +1,26 @@
+---
+
+- name: Test DataPower domain module checkpoint (create)
+  connection: local
+  hosts: localhost
+
+  tasks:
+
+  - name: Include connection data
+    include_vars:
+        file: idg-connection.yml
+        name: remote_idg
+
+  - name: Create checkpoint
+    idg_domain_chkpoint:
+        name: "{{ chkpoint_name }}"
+        domain: "{{ domain_name }}"
+        idg_connection: "{{ remote_idg }}"
+        state: present
+    register: create_chk_out
+
+  - name: Dump create checkpoint
+    debug:
+        var: create_chk_out
+
+...

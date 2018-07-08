@@ -1,0 +1,26 @@
+---
+
+- name: Test DataPower domain module checkpoint (restore)
+  connection: local
+  hosts: localhost
+
+  tasks:
+
+  - name: Include connection data
+    include_vars:
+        file: idg-connection.yml
+        name: remote_idg
+
+  - name: Restore from checkpoint
+    idg_domain_chkpoint:
+        name: "{{ chkpoint_name }}"
+        domain: "{{ domain_name }}"
+        idg_connection: "{{ remote_idg }}"
+        state: restored
+    register: bak_chk_out
+
+  - name: Dump restore checkpoint
+    debug:
+        var: bak_chk_out
+
+...

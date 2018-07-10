@@ -69,7 +69,7 @@ cp examples/domain/idg-connection.yml examples/domain_config/idg-connection.yml
 
 Repeat the executions, The **immutability** of the modules is very important!!!
 
-Module `idg_domain`
+**Module `idg_domain`**
 
 ```shell
 ansible-playbook examples/domain/create.yml -e "domain_name=test"
@@ -82,7 +82,8 @@ ansible-playbook examples/domain/create-multiple.yml
 ansible-playbook examples/domain/remove-multiple.yml
 ```
 
-Module `idg_domain_config`
+**Module `idg_domain_config`**
+
 ```shell
 # Configure a few services in test1. Why not, also upload some files to local:/
 ansible-playbook examples/domain/create.yml -e "domain_name=test1"
@@ -102,6 +103,18 @@ ansible-playbook examples/domain_config/reset.yml -e "domain_name=test1"
 # Save and restore the services of the new domain
 ansible-playbook examples/domain_config/save.yml -e "domain_name=test2"
 ansible-playbook examples/domain/restart.yml -e "domain_name=test2"
+```
+
+**Module `idg_domain_chkpoint`**
+
+```shell
+ansible-playbook examples/domain_chkpoint/create.yml -e "domain_name=test2 chkpoint_name=chk-point1"
+
+# Configure a few services in test2. Why not, also upload some files to local:/
+
+ansible-playbook examples/domain_chkpoint/restore.yml -e "domain_name=test2 chkpoint_name=chk-point1"
+
+ansible-playbook examples/domain_chkpoint/remove.yml -e "domain_name=test2 chkpoint_name=chk-point1"
 ```
 
 Documentation

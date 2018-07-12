@@ -67,7 +67,7 @@ tee examples/domain_{config,chkpoint}/idg-connection.yml > /dev/null < examples/
 
 7. Enjoy :blush:
 
-Repeat the executions, The **immutability** of the modules is very important!!!
+Repeat the executions, The **idempotency** of the modules is very important!!!
 
 **Module `idg_domain`**
 

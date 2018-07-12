@@ -62,7 +62,7 @@ cd datapower-ansible
 
 ```shell
 vi examples/domain/idg-connection.yml
-cp examples/domain/idg-connection.yml examples/domain_config/idg-connection.yml
+tee examples/domain_{config,chkpoint}/idg-connection.yml > /dev/null < examples/domain/idg-connection.yml
 ```
 
 7. Enjoy :blush:

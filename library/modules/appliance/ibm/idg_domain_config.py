@@ -30,7 +30,7 @@ options:
         C(reseted) will delete all configured services within the domain.
         C(exported), C(imported), C(saved) domain settings
       - Be particularly careful about changing the status C(reseted).
-        These will deletes all configuration data in the domain.
+        These will B(deletes all configuration) data in the domain.
     default: saved
     required: True
     choices:
@@ -46,58 +46,58 @@ options:
   all_files:
     description:
       - Include all files in the local directory for the domain?
-      - Only be taken into account during the export
+      - Only be taken into account when I(state=exported)
     default: False
     type: bool
 
   persisted:
     description:
       - Export from persisted or running configuration?
-      - Only be taken into account during the export
+      - Only be taken into account when I(state=exported)
     default: False
     type: bool
 
   internal_files:
     description:
       - Export internal configuration files?
-      - Only be taken into account during the export
+      - Only be taken into account when I(state=exported)
     default: True
     type: bool
 
   input_file:
     description:
       - The base64-encoded BLOB to import
-      - Only be taken into account during the import
+      - Only be taken into account when I(state=imported)
 
   overwrite_files:
     description:
       - Overwrite local files
-      - Only be taken into account during the import
+      - Only be taken into account when I(state=imported)
     default: False
     type: bool
 
   overwrite_objects:
     description:
       - Overwrite objects that exist
-      - Only be taken into account during the import
+      - Only be taken into account when I(state=imported)
     default: False
     type: bool
 
   dry_run:
     description:
       - Import package (on) or validate the import operation without importing (off).
-      - Only be taken into account during the import
+      - Only be taken into account when I(state=imported)
     default: False
     type: bool
 
   rewrite_local_ip:
     description:
       - The local address bindings of services in the import package are rewritten on import to their equivalent interfaces
-      - Only be taken into account during the import
+      - Only be taken into account I(state=imported)
     default: False
     type: bool
 
-# extends_documentation_fragment: idg
+extends_documentation_fragment: idg
 
 author:
   - David Grau Merconchini (@dgraum)
@@ -163,9 +163,40 @@ msg:
   sample:
     - Configuration was created.
     - Unknown error for (https://idg-host1:5554/mgmt/domains/config/). <open_url error timed out>
+results:
+  description:
+    - Import result detail
+  returned: when successfull imported
+  type: complex
+  contains:
+      exec-script-results:
+          description: Result of the execution of the import scripts
+          returned: success
+          type: complex
+      export-details:
+          description: Export details
+          returned: success
+          type: complex
+      file-copy-log:
+          description: Record of the copying files process
+          returned: success
+          type: complex
+      imported-debug:
+          description: Detail when importing debugging configurations
+          returned: success
+          type: complex
+      imported-files:
+          description: Detail when importing files
+          returned: success
+          type: complex
+      imported-objects:
+          description: Imported objects
+          returned: success
+          type: complex
 '''
 
 import json
+import yaml
 # import pdb
 
 from ansible.module_utils.basic import AnsibleModule
@@ -173,70 +204,82 @@ from ansible.module_utils._text import to_native
 
 # Common package of our implementation for IDG
 try:
-    from ansible.module_utils.appliance.ibm.idg_common import result, idg_endpoint_spec, IDG_Utils
-    from ansible.module_utils.appliance.ibm.idg_rest_mgmt import IDG_API
+    from ansible.module_utils.appliance.ibm.idg_common import result, idg_endpoint_spec, IDGUtils
+    from ansible.module_utils.appliance.ibm.idg_rest_mgmt import IDGApi
     HAS_IDG_DEPS = True
 except ImportError:
     HAS_IDG_DEPS = False
 
+# Version control
+__MODULE_NAME = yaml.load(DOCUMENTATION)['module']
+__MODULE_VERSION = "1.0"
+__MODULE_FULLNAME = __MODULE_NAME + '-' + __MODULE_VERSION
+
+
+# Return dictionary with the inventory of states
+def get_status_summary(list_dict):
+    s = {}
+    for i in list_dict:
+        if i['status'] not in s.keys():
+            s.update({i['status']: 1})
+        else:
+            s[i['status']] += 1
+    return s
+
 
 def main():
 
-    # Arguments/parameters that a user can pass to the module
-    module_args = dict(
-        state=dict(type='str', choices=['exported', 'imported', 'reseted', 'saved'], default='saved'),  # Domain's operational state
-        idg_connection=dict(type='dict', options=idg_endpoint_spec, required=True),  # IDG connection
-        name=dict(type='str', required=True),  # Domain to work
-        # for Export
-        user_summary=dict(type='str'),  # Backup comment
-        all_files=dict(type='bool', default=False),  # Include all files in the local: directory for the domain
-        persisted=dict(type='bool', default=False),  # Export from persisted or running configuration
-        internal_files=dict(type='bool', default=True),  # Export internal configuration file
-        # for Import
-        input_file=dict(type='str', required=False, no_log=True),  # The base64-encoded BLOB to import
-        overwrite_files=dict(type='bool', default=False),  # Overwrite files that exist
-        overwrite_objects=dict(type='bool', default=False),  # Overwrite objects that exist
-        dry_run=dict(type='bool', default=False),  # Import package (on) or validate the import operation without importing (off).
-        rewrite_local_ip=dict(type='bool', default=False)  # The local address binding to their equivalent interfaces in appliance
-        # TODO !!!
-        # DeploymentPolicy
-    )
-
-    # AnsibleModule instantiation
-    module = AnsibleModule(
-        argument_spec=module_args,
-        supports_check_mode=True,
-        # Interaction between parameters
-        required_if=[['state', 'imported', ['input_file']]]
-    )
-
-    # Validates the dependence of the utility module
-    if not HAS_IDG_DEPS:
-        module.fail_json(msg="The IDG utils module is required")
-
     try:
+        # Arguments/parameters that a user can pass to the module
+        module_args = dict(
+            state=dict(type='str', choices=['exported', 'imported', 'reseted', 'saved'], default='saved'),  # Domain's operational state
+            idg_connection=dict(type='dict', options=idg_endpoint_spec, required=True),  # IDG connection
+            name=dict(type='str', required=True),  # Domain to work
+            # for Export
+            user_summary=dict(type='str'),  # Backup comment
+            all_files=dict(type='bool', default=False),  # Include all files in the local: directory for the domain
+            persisted=dict(type='bool', default=False),  # Export from persisted or running configuration
+            internal_files=dict(type='bool', default=True),  # Export internal configuration file
+            # for Import
+            input_file=dict(type='str', required=False, no_log=True),  # The base64-encoded BLOB to import
+            overwrite_files=dict(type='bool', default=False),  # Overwrite files that exist
+            overwrite_objects=dict(type='bool', default=False),  # Overwrite objects that exist
+            dry_run=dict(type='bool', default=False),  # Import package (on) or validate the import operation without importing (off).
+            rewrite_local_ip=dict(type='bool', default=False)  # The local address binding to their equivalent interfaces in appliance
+            # TODO !!!
+            # DeploymentPolicy
+        )
+
+        # AnsibleModule instantiation
+        module = AnsibleModule(
+            argument_spec=module_args,
+            supports_check_mode=True,
+            # Interaction between parameters
+            required_if=[['state', 'imported', ['input_file']]]
+        )
+
+        # Validates the dependence of the utility module
+        if not HAS_IDG_DEPS:
+            module.fail_json(msg="The IDG utils modules is required")
 
         # Parse arguments to dict
-        idg_data_spec = IDG_Utils.parse_to_dict(module, module.params['idg_connection'], 'IDGConnection', IDG_Utils.ANSIBLE_VERSION)
+        idg_data_spec = IDGUtils.parse_to_dict(module, module.params['idg_connection'], 'IDGConnection', IDGUtils.ANSIBLE_VERSION)
 
         # Status & domain
         state = module.params['state']
         domain_name = module.params['name']
 
-        # Result
-        result['name'] = domain_name
-
         # Init IDG API connect
-        idg_mgmt = IDG_API(ansible_module=module,
-                           idg_host="https://{0}:{1}".format(idg_data_spec['server'], idg_data_spec['server_port']),
-                           headers=IDG_Utils.BASIC_HEADERS,
-                           http_agent=IDG_Utils.HTTP_AGENT_SPEC,
-                           use_proxy=idg_data_spec['use_proxy'],
-                           timeout=idg_data_spec['timeout'],
-                           validate_certs=idg_data_spec['validate_certs'],
-                           user=idg_data_spec['user'],
-                           password=idg_data_spec['password'],
-                           force_basic_auth=IDG_Utils.BASIC_AUTH_SPEC)
+        idg_mgmt = IDGApi(ansible_module=module,
+                          idg_host="https://{0}:{1}".format(idg_data_spec['server'], idg_data_spec['server_port']),
+                          headers=IDGUtils.BASIC_HEADERS,
+                          http_agent=IDGUtils.HTTP_AGENT_SPEC,
+                          use_proxy=idg_data_spec['use_proxy'],
+                          timeout=idg_data_spec['timeout'],
+                          validate_certs=idg_data_spec['validate_certs'],
+                          user=idg_data_spec['user'],
+                          password=idg_data_spec['password'],
+                          force_basic_auth=IDGUtils.BASIC_AUTH_SPEC)
 
         # Variable to store the status of the action
         action_result = ''
@@ -245,9 +288,9 @@ def main():
         export_action_msg = {"Export": {
             "Format": "ZIP",
             "UserComment": module.params['user_summary'],
-            "AllFiles": IDG_Utils.on_off(module.params['all_files']),
-            "Persisted": IDG_Utils.on_off(module.params['persisted']),
-            "IncludeInternalFiles": IDG_Utils.on_off(module.params['internal_files'])
+            "AllFiles": IDGUtils.str_on_off(module.params['all_files']),
+            "Persisted": IDGUtils.str_on_off(module.params['persisted']),
+            "IncludeInternalFiles": IDGUtils.str_on_off(module.params['internal_files'])
             # TODO
             # "DeploymentPolicy":""
         }}
@@ -255,10 +298,10 @@ def main():
         import_action_msg = {"Import": {
             "Format": "ZIP",
             "InputFile": module.params['input_file'],
-            "OverwriteFiles": IDG_Utils.on_off(module.params['overwrite_files']),
-            "OverwriteObjects": IDG_Utils.on_off(module.params['overwrite_objects']),
-            "DryRun": IDG_Utils.on_off(module.params['dry_run']),
-            "RewriteLocalIP": IDG_Utils.on_off(module.params['rewrite_local_ip'])
+            "OverwriteFiles": IDGUtils.str_on_off(module.params['overwrite_files']),
+            "OverwriteObjects": IDGUtils.str_on_off(module.params['overwrite_objects']),
+            "DryRun": IDGUtils.str_on_off(module.params['dry_run']),
+            "RewriteLocalIP": IDGUtils.str_on_off(module.params['rewrite_local_ip'])
             # TODO
             # "DeploymentPolicy": "name",
             # "DeploymentPolicyParams": "name",
@@ -275,8 +318,11 @@ def main():
         # Here the action begins
         #
 
+        # Intermediate values ​​for result
+        tmp_result={"name": domain_name, "msg": None, "file": None, "changed": None, "failed": None}
+
         # List of configured domains
-        chk_code, chk_msg, chk_data = idg_mgmt.api_call(IDG_API.URI_DOMAIN_LIST, method='GET')
+        chk_code, chk_msg, chk_data = idg_mgmt.api_call(IDGApi.URI_DOMAIN_LIST, method='GET')
 
         if chk_code == 200 and chk_msg == 'OK':  # If the answer is correct
 
@@ -291,16 +337,16 @@ def main():
                 if state == 'exported':
 
                     # If the user is working in only check mode we do not want to make any changes
-                    IDG_Utils.implement_check_mode(module, result)
+                    IDGUtils.implement_check_mode(module, result)
 
                     # export and finish
                     # pdb.set_trace()
-                    exp_code, exp_msg, exp_data = idg_mgmt.api_call(IDG_API.URI_ACTION.format(domain_name), method='POST',
+                    exp_code, exp_msg, exp_data = idg_mgmt.api_call(IDGApi.URI_ACTION.format(domain_name), method='POST',
                                                                     data=json.dumps(export_action_msg))
 
                     if exp_code == 202 and exp_msg == 'Accepted':
                         # Asynchronous actions export accepted. Wait for complete
-                        action_result = idg_mgmt.wait_for_action_end(IDG_API.URI_ACTION.format(domain_name), href=exp_data['_links']['location']['href'],
+                        action_result = idg_mgmt.wait_for_action_end(IDGApi.URI_ACTION.format(domain_name), href=exp_data['_links']['location']['href'],
                                                                      state=state)
 
                         # Export completed. Get result
@@ -308,35 +354,35 @@ def main():
 
                         if doex_code == 200 and doex_msg == 'OK':
                             # Export ok
-                            result['file'] = doex_data['result']['file']
-                            result['msg'] = action_result
-                            result['changed'] = True
+                            tmp_result['file'] = doex_data['result']['file']
+                            tmp_result['msg'] = action_result
+                            tmp_result['changed'] = True
                         else:
                             # Can't retrieve the export
-                            module.fail_json(msg=to_native(IDG_API.ERROR_RETRIEVING_RESULT.format(state, domain_name)))
+                            module.fail_json(msg=IDGApi.ERROR_RETRIEVING_RESULT.format(state, domain_name))
 
                     elif exp_code == 200 and exp_msg == 'OK':
                         # Successfully processed synchronized action
-                        result['msg'] = idg_mgmt.status_text(exp_data['Export'])
-                        result['changed'] = True
+                        tmp_result['msg'] = idg_mgmt.status_text(exp_data['Export'])
+                        tmp_result['changed'] = True
 
                     else:
                         # Export not accepted
-                        module.fail_json(msg=to_native(IDG_API.ERROR_ACCEPTING_ACTION.format(state, domain_name)))
+                        module.fail_json(msg=IDGApi.ERROR_ACCEPTING_ACTION.format(state, domain_name))
 
                 elif state == 'reseted':
 
                     # If the user is working in only check mode we do not want to make any changes
-                    IDG_Utils.implement_check_mode(module, result)
+                    IDGUtils.implement_check_mode(module, result)
 
                     # Reseted domain
-                    reset_code, reset_msg, reset_data = idg_mgmt.api_call(IDG_API.URI_ACTION.format(domain_name), method='POST',
+                    reset_code, reset_msg, reset_data = idg_mgmt.api_call(IDGApi.URI_ACTION.format(domain_name), method='POST',
                                                                           data=json.dumps(reset_act_msg))
 
                     # pdb.set_trace()
                     if reset_code == 202 and reset_msg == 'Accepted':
                         # Asynchronous actions reset accepted. Wait for complete
-                        action_result = idg_mgmt.wait_for_action_end(IDG_API.URI_ACTION.format(domain_name), href=reset_data['_links']['location']['href'],
+                        action_result = idg_mgmt.wait_for_action_end(IDGApi.URI_ACTION.format(domain_name), href=reset_data['_links']['location']['href'],
                                                                      state=state)
 
                         # Reseted completed
@@ -344,24 +390,24 @@ def main():
 
                         if dore_code == 200 and dore_msg == 'OK':
                             # Reseted successfully
-                            result['msg'] = dore_data['status'].capitalize()
-                            result['changed'] = True
+                            tmp_result['msg'] = dore_data['status'].capitalize()
+                            tmp_result['changed'] = True
                         else:
                             # Can't retrieve the reset result
-                            module.fail_json(msg=to_native(IDG_API.ERROR_RETRIEVING_RESULT.format(state, domain_name)))
+                            module.fail_json(msg=IDGApi.ERROR_RETRIEVING_RESULT.format(state, domain_name))
 
                     elif reset_code == 200 and reset_msg == 'OK':
                         # Successfully processed synchronized action
-                        result['msg'] = idg_mgmt.status_text(reset_data['ResetThisDomain'])
-                        result['changed'] = True
+                        tmp_result['msg'] = idg_mgmt.status_text(reset_data['ResetThisDomain'])
+                        tmp_result['changed'] = True
 
                     else:
                         # Reseted not accepted
-                        module.fail_json(msg=to_native(IDG_API.ERROR_ACCEPTING_ACTION.format(state, domain_name)))
+                        module.fail_json(msg=IDGApi.ERROR_ACCEPTING_ACTION.format(state, domain_name))
 
                 elif state == 'saved':
 
-                    qds_code, qds_msg, qds_data = idg_mgmt.api_call(IDG_API.URI_DOMAIN_STATUS, method='GET')
+                    qds_code, qds_msg, qds_data = idg_mgmt.api_call(IDGApi.URI_DOMAIN_STATUS, method='GET')
 
                     # pdb.set_trace()
                     if qds_code == 200 and qds_msg == 'OK':
@@ -375,15 +421,15 @@ def main():
                         if domain_save_needed != 'off':
 
                             # If the user is working in only check mode we do not want to make any changes
-                            IDG_Utils.implement_check_mode(module, result)
+                            IDGUtils.implement_check_mode(module, result)
 
-                            save_code, save_msg, save_data = idg_mgmt.api_call(IDG_API.URI_ACTION.format(domain_name), method='POST',
+                            save_code, save_msg, save_data = idg_mgmt.api_call(IDGApi.URI_ACTION.format(domain_name), method='POST',
                                                                                data=json.dumps(save_act_msg))
 
                             # pdb.set_trace()
                             if save_code == 202 and save_msg == 'Accepted':
                                 # Asynchronous actions save accepted. Wait for complete
-                                action_result = idg_mgmt.wait_for_action_end(IDG_API.URI_ACTION.format(domain_name),
+                                action_result = idg_mgmt.wait_for_action_end(IDGApi.URI_ACTION.format(domain_name),
                                                                              href=save_data['_links']['location']['href'], state=state)
 
                                 # Save ready
@@ -391,37 +437,36 @@ def main():
 
                                 if dosv_code == 200 and dosv_msg == 'OK':
                                     # Save completed
-                                    result['msg'] = action_result
-                                    result['changed'] = True
+                                    tmp_result['msg'] = action_result
+                                    tmp_result['changed'] = True
                                 else:
                                     # Can't retrieve the save result
-                                    module.fail_json(msg=to_native(IDG_API.ERROR_RETRIEVING_RESULT.format(state, domain_name)))
+                                    module.fail_json(msg=IDGApi.ERROR_RETRIEVING_RESULT.format(state, domain_name))
 
                             elif save_code == 200 and save_msg == 'OK':
                                 # Successfully processed synchronized action save
-                                result['msg'] = idg_mgmt.status_text(save_data['SaveConfig'])
-                                result['changed'] = True
+                                tmp_result['msg'] = idg_mgmt.status_text(save_data['SaveConfig'])
+                                tmp_result['changed'] = True
                             else:
                                 # Can't saved
-                                module.fail_json(msg=to_native(IDG_API.ERROR_RETRIEVING_RESULT.format(state, domain_name)))
+                                module.fail_json(msg=IDGApi.ERROR_RETRIEVING_RESULT.format(state, domain_name))
                         else:
                             # Domain is save
-                            result['msg'] = IDG_Utils.IMMUTABLE_MESSAGE
+                            tmp_result['msg'] = IDGUtils.IMMUTABLE_MESSAGE
 
                 elif state == 'imported':
 
                     # If the user is working in only check mode we do not want to make any changes
-                    IDG_Utils.implement_check_mode(module, result)
+                    IDGUtils.implement_check_mode(module, result)
 
                     # Import
                     # pdb.set_trace()
-                    imp_code, imp_msg, imp_data = idg_mgmt.api_call(IDG_API.URI_ACTION.format(domain_name), method='POST',
+                    imp_code, imp_msg, imp_data = idg_mgmt.api_call(IDGApi.URI_ACTION.format(domain_name), method='POST',
                                                                     data=json.dumps(import_action_msg))
 
-                    # pdb.set_trace()
                     if imp_code == 202 and imp_msg == 'Accepted':
                         # Asynchronous actions import accepted. Wait for complete
-                        action_result = idg_mgmt.wait_for_action_end(IDG_API.URI_ACTION.format(domain_name), href=imp_data['_links']['location']['href'],
+                        action_result = idg_mgmt.wait_for_action_end(IDGApi.URI_ACTION.format(domain_name), href=imp_data['_links']['location']['href'],
                                                                      state=state)
 
                         # Import ready
@@ -429,38 +474,123 @@ def main():
 
                         if doim_code == 200 and doim_msg == 'OK':
                             # Export completed
-                            if doim_data['result']['Import']['import-results']['detected-errors'] == 'true':
+                            import_results = doim_data['result']['Import']['import-results']
+                            if import_results['detected-errors'] != 'false':
+                                # Import failed
                                 # pdb.set_trace()
-                                result['msg'] = 'Error code:' + doim_data['result']['Import']['import-results']['detected-errors']['error']
-                                result['changed'] = False
-                                result['failed'] = True
+                                tmp_result['msg'] = 'Import failed with error code: "' + import_results['detected-errors']['error'] + '"'
+                                tmp_result['changed'] = False
+                                tmp_result['failed'] = True
                             else:
-                                result['msg'] = doim_data['status'].capitalize()
-                                result['changed'] = True
+                                # Import success
+                                tmp_result.update({"results": []})  # Update to result
+
+                                tmp_result['results'].append({"export-details": import_results['export-details']})
+
+                                # EXEC-SCRIPT-RESULTS
+                                try:
+                                    exec_script_results = import_results['exec-script-results']
+                                    try:
+                                        if isinstance(exec_script_results['cfg-result'], list):
+
+                                            tmp_result['results'].append({"exec-script-results":
+                                                                     {"summary": {"total": len(exec_script_results['cfg-result']),
+                                                                                  "status": get_status_summary(exec_script_results['cfg-result'])},
+                                                                      "detail": exec_script_results['cfg-result']}})
+                                        else:
+                                            tmp_result['results'].append({"exec-script-results": exec_script_results['cfg-result']})
+
+                                    except Exception as e:
+                                        tmp_result['results'].append({"exec-script-results": exec_script_results})
+
+                                except Exception as e:
+                                    pass
+
+                                try:
+                                    tmp_result['results'].append({"file-copy-log": import_results['file-copy-log']['file-result']})
+                                except Exception as e:
+                                    pass
+
+                                try:
+                                    tmp_result['results'].append({"imported-debug": import_results['imported-debug']})
+                                except Exception as e:
+                                    pass
+
+                                # IMPORTED-FILES
+                                try:
+                                    imported_files = import_results['imported-files']
+                                    try:
+                                        if isinstance(imported_files['file'], list):
+
+                                            tmp_result['results'].append({"imported-files": {"summary": {"total": len(imported_files['file']),
+                                                                                                     "status": get_status_summary(imported_files['file'])},
+                                                                                         "detail": imported_files['file']}})
+                                        else:
+                                            tmp_result['results'].append({"imported-files": imported_files['file']})
+
+                                    except Exception as e:
+                                        tmp_result['results'].append({"imported-files": imported_files})
+
+                                except Exception as e:
+                                    pass
+
+                                # IMPORTED-OBJECTS
+                                try:
+                                    imported_objects = import_results['imported-objects']
+                                    try:
+                                        if isinstance(imported_objects['object'], list):
+
+                                            tmp_result['results'].append({"imported-objects": {"summary": {"total": len(imported_objects['object']),
+                                                                                           "status": get_status_summary(imported_objects['object'])},
+                                                                      "detail": imported_objects['object']}})
+                                        else:
+                                            tmp_result['results'].append({"imported-objects": imported_objects['object']})
+
+                                    except Exception as e:
+                                        tmp_result['results'].append({"imported-objects": imported_objects})
+
+                                except Exception as e:
+                                    pass
+
+                                tmp_result['msg'] = doim_data['status'].capitalize()
+                                tmp_result['changed'] = True
                         else:
                             # Can't retrieve the import result
-                            module.fail_json(msg=to_native(IDG_API.ERROR_RETRIEVING_RESULT.format(state, domain_name)))
+                            module.fail_json(msg=IDGApi.ERROR_RETRIEVING_RESULT.format(state, domain_name))
 
                     elif imp_code == 200 and imp_msg == 'OK':
                         # Successfully processed synchronized action
-                        result['msg'] = idg_mgmt.status_text(imp_data['Import'])
-                        result['changed'] = True
+                        tmp_result['msg'] = idg_mgmt.status_text(imp_data['Import'])
+                        tmp_result['changed'] = True
 
                     else:
                         # Imported not accepted
-                        module.fail_json(msg=to_native(IDG_API.ERROR_ACCEPTING_ACTION.format(state, domain_name)))
+                        module.fail_json(msg=IDGApi.ERROR_ACCEPTING_ACTION.format(state, domain_name))
 
             else:  # Domain NOT EXIST.
                 # pdb.set_trace()
                 # Opps can't work the configuration of non-existent domain
-                module.fail_json(msg=(IDG_API.ERROR_REACH_STATE + ' Domain not exist!').format(state, domain_name))
+                module.fail_json(msg=(IDGApi.ERROR_REACH_STATE + " " + IDGApi.ERROR_NOT_DOMAIN).format(state, domain_name))
 
         else:  # Can't read domain's lists
-            module.fail_json(msg=IDG_API.ERROR_GET_DOMAIN_LIST)
+            module.fail_json(msg=IDGApi.ERROR_GET_DOMAIN_LIST)
+
+        #
+        # Finish
+        #
+        # Update
+        for k, v in tmp_result.items():
+            if v != None:
+                result[k] = v
+
+    except (NameError, UnboundLocalError) as e:
+        # Very early error
+        module_except = AnsibleModule(argument_spec={})
+        module_except.fail_json(msg=to_native(e))
 
     except Exception as e:
         # Uncontrolled exception
-        module.fail_json(msg=(IDG_Utils.UNCONTROLLED_EXCEPTION + '. {0}').format(to_native(e)))
+        module.fail_json(msg=(IDGUtils.UNCONTROLLED_EXCEPTION + '. {0}').format(to_native(e)))
     else:
         # That's all folks!
         module.exit_json(**result)

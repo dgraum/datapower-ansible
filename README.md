@@ -117,6 +117,12 @@ ansible-playbook examples/domain_chkpoint/restore.yml -e "domain_name=test2 chkp
 ansible-playbook examples/domain_chkpoint/remove.yml -e "domain_name=test2 chkpoint_name=chk-point1"
 ```
 
+**Module `idg_domain_discovery`**
+
+```shell
+ansible-playbook examples/domain_discovery/discovery.yml
+```
+
 Documentation
 -------------
 

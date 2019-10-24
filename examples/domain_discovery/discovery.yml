@@ -1,0 +1,23 @@
+---
+
+- name: Test DataPower domain module
+  connection: local
+  hosts: localhost
+
+  tasks:
+
+  - name: Include connection data
+    include_vars:
+        file: idg-connection.yml
+        name: remote_idg
+
+  - name: Domains discovery
+    idg_list:
+        idg_connection: "{{ remote_idg }}"
+    register: domains_out
+
+  - name: Dump output
+    debug:
+        var: domains_out
+
+...

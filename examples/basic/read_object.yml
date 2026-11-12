@@ -1,0 +1,31 @@
+---
+# Read one configuration object. Nothing is written and nothing is saved.
+#
+# ansible-playbook -i inventory.yml examples/basic/read_object.yml \
+#   -e config_domain=default -e config_class=Domain -e config_name=default
+
+- name: Read one DataPower object
+  hosts: idg
+  gather_facts: false
+
+  tasks:
+    - name: Require the object address
+      ansible.builtin.assert:
+        that:
+          - config_domain is defined
+          - config_class is defined
+          - config_name is defined
+        fail_msg: >-
+          Pass -e config_domain=default -e config_class=Domain
+          -e config_name=default.
+
+    - name: Read the object
+      gr.idg.config:
+        domain: "{{ config_domain }}"
+        class_name: "{{ config_class }}"
+        name: "{{ config_name }}"
+      register: object_read
+
+    - name: Show the object
+      ansible.builtin.debug:
+        var: object_read.config

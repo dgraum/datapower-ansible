@@ -1,0 +1,16 @@
+---
+# Pin the collection in the project that runs the playbooks.
+# ansible-galaxy collection install -r examples/basic/requirements.yml
+#
+# ansible.netcommon is installed with gr.idg because galaxy.yml declares it.
+#
+# Before the Galaxy namespace is published, install the Git tag instead:
+#
+# collections:
+#   - name: git+https://github.com/dgraum/datapower-ansible.git
+#     type: git
+#     version: v1.0.0
+
+collections:
+  - name: gr.idg
+    version: ">=1.0.0,<2.0.0"

@@ -1,0 +1,48 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the collection
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install ansible-core
+        run: pip install "ansible-core>=2.19.0,<2.20"
+
+      - name: Build the collection
+        run: ansible-galaxy collection build
+
+      - name: Publish the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          test -f "gr-idg-${version}.tar.gz"
+          gh release create "$GITHUB_REF_NAME" \
+            "gr-idg-${version}.tar.gz" \
+            --title "gr.idg ${version}" \
+            --notes "Install with ansible-galaxy collection install gr.idg:${version} or from the attached tarball. See the README for the first playbook."
+
+      - name: Publish to Ansible Galaxy
+        env:
+          GALAXY_API_KEY: ${{ secrets.GALAXY_API_KEY }}
+        run: |
+          if [ -z "${GALAXY_API_KEY}" ]; then
+            echo "GALAXY_API_KEY is not set. The GitHub release is the install source."
+            exit 0
+          fi
+          ansible-galaxy collection publish gr-idg-*.tar.gz --api-key "$GALAXY_API_KEY"

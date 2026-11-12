@@ -1,0 +1,11 @@
+name: Example
+description: Propose an example for a later release
+title: "[example] "
+body:
+  - type: textarea
+    id: playbook
+    attributes:
+      label: What the playbook does
+      description: Name the modules. An example is released only after it has been run with the collection version that will contain it.
+    validations:
+      required: true

@@ -1,0 +1,160 @@
+---
+requires_ansible: ">=2.19.0"
+
+action_groups:
+  idg:
+    - action
+    - action_queue
+    - chkpoint
+    - chkpoint_status
+    - cli
+    - config
+    - crypto_certificate
+    - crypto_key
+    - crypto_object
+    - documentcache_summary
+    - domain
+    - domain_active_services
+    - domain_config
+    - domain_log_level
+    - domain_status
+    - facts
+    - file_management
+    - file_upload
+    - loadbalancer_groupmembers
+    - loadbalancer_status
+    - log_error_summary
+    - mgmt_info
+    - password_alias
+    - ping
+    - sensors_current
+    - sensors_env_fan
+    - sensors_other
+    - sensors_power
+    - sensors_temperature
+    - sensors_voltage
+    - service_resolve_by_endpoint
+    - status
+    - status_connectionsaccepted
+    - status_cpu
+    - status_datetime
+    - status_ethernet_interface
+    - status_filesystem
+    - status_memory
+    - status_raidphysicaldrive
+    - status_systemusage
+    - status_tcpsummary
+    - status_transactionrate
+    - status_transactiontimes
+    - stylesheetcache_flush
+    - stylesheetcache_summary
+    - systemsettings
+    - tcpconnectiontest
+    - traceroute
+    - wsgateway_config
+    - wsgateway_operations_status
+    - wsgateway_wsdl_refresh
+    - wsgateway_wsdl_status
+    - wsrr_savedsearchsubscription_status
+    - wsrr_savedsearchsubscription_sync
+
+plugin_routing:
+  modules:
+    idg_action_queue:
+      redirect: gr.idg.action_queue
+    idg_chkpoint:
+      redirect: gr.idg.chkpoint
+    idg_chkpoint_status:
+      redirect: gr.idg.chkpoint_status
+    idg_cli:
+      redirect: gr.idg.cli
+    idg_crypto_object:
+      redirect: gr.idg.crypto_object
+    idg_documentcache_summary:
+      redirect: gr.idg.documentcache_summary
+    idg_domain:
+      redirect: gr.idg.domain
+    idg_domain_active_services:
+      redirect: gr.idg.domain_active_services
+    idg_domain_config:
+      redirect: gr.idg.domain_config
+    idg_domain_log_level:
+      redirect: gr.idg.domain_log_level
+    idg_domain_status:
+      redirect: gr.idg.domain_status
+    idg_facts:
+      redirect: gr.idg.facts
+    idg_file_management:
+      redirect: gr.idg.file_management
+    idg_file_upload:
+      redirect: gr.idg.file_upload
+    idg_loadbalancer_groupmembers:
+      redirect: gr.idg.loadbalancer_groupmembers
+    idg_loadbalancer_status:
+      redirect: gr.idg.loadbalancer_status
+    idg_log_error_summary:
+      redirect: gr.idg.log_error_summary
+    idg_password_alias:
+      redirect: gr.idg.password_alias
+    idg_ping:
+      redirect: gr.idg.ping
+    idg_sensors_current:
+      redirect: gr.idg.sensors_current
+    idg_sensors_env_fan:
+      redirect: gr.idg.sensors_env_fan
+    idg_sensors_other:
+      redirect: gr.idg.sensors_other
+    idg_sensors_power:
+      redirect: gr.idg.sensors_power
+    idg_sensors_temperature:
+      redirect: gr.idg.sensors_temperature
+    idg_sensors_voltage:
+      redirect: gr.idg.sensors_voltage
+    idg_service_config:
+      redirect: gr.idg.config
+    idg_service_resolve_by_endpoint:
+      redirect: gr.idg.service_resolve_by_endpoint
+    idg_status_connectionsaccepted:
+      redirect: gr.idg.status_connectionsaccepted
+    idg_status_cpu:
+      redirect: gr.idg.status_cpu
+    idg_status_datetime:
+      redirect: gr.idg.status_datetime
+    idg_status_ethernet_interface:
+      redirect: gr.idg.status_ethernet_interface
+    idg_status_filesystem:
+      redirect: gr.idg.status_filesystem
+    idg_status_memory:
+      redirect: gr.idg.status_memory
+    idg_status_raidphysicaldrive:
+      redirect: gr.idg.status_raidphysicaldrive
+    idg_status_systemusage:
+      redirect: gr.idg.status_systemusage
+    idg_status_tcpsummary:
+      redirect: gr.idg.status_tcpsummary
+    idg_status_transactionrate:
+      redirect: gr.idg.status_transactionrate
+    idg_status_transactiontimes:
+      redirect: gr.idg.status_transactiontimes
+    idg_stylesheetcache_flush:
+      redirect: gr.idg.stylesheetcache_flush
+    idg_stylesheetcache_summary:
+      redirect: gr.idg.stylesheetcache_summary
+    idg_systemsettings:
+      redirect: gr.idg.systemsettings
+    idg_tcpconnectiontest:
+      redirect: gr.idg.tcpconnectiontest
+    idg_traceroute:
+      redirect: gr.idg.traceroute
+    idg_wsgateway_config:
+      redirect: gr.idg.wsgateway_config
+    idg_wsgateway_operations_status:
+      redirect: gr.idg.wsgateway_operations_status
+    idg_wsgateway_wsdl_refresh:
+      redirect: gr.idg.wsgateway_wsdl_refresh
+    idg_wsgateway_wsdl_status:
+      redirect: gr.idg.wsgateway_wsdl_status
+    idg_wsrr_savedsearchsubscription_status:
+      redirect: gr.idg.wsrr_savedsearchsubscription_status
+    idg_wsrr_savedsearchsubscription_sync:
+      redirect: gr.idg.wsrr_savedsearchsubscription_sync

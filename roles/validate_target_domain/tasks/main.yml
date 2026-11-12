@@ -1,0 +1,6 @@
+---
+# Validate that target_domain is provided (runtime --extra-vars).
+- name: Terminate if not is provided a application domain
+  ansible.builtin.fail:
+    msg: A valid application domain is required
+  when: (target_domain is not defined) or (target_domain | trim) == ''

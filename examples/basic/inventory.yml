@@ -1,0 +1,17 @@
+---
+# Copy this file, then set ansible_host to the REST management address.
+# Keep the password in Ansible Vault. Do not commit the vault password
+# or a filled-in copy of this inventory.
+
+all:
+  hosts:
+    idg:
+      ansible_host: idg.example.com
+      ansible_connection: ansible.netcommon.httpapi
+      ansible_network_os: gr.idg.rest_mgmt
+      ansible_httpapi_use_ssl: true
+      ansible_httpapi_validate_certs: true
+      ansible_httpapi_port: 5554
+      ansible_user: admin
+      ansible_password: "{{ vault_idg_password }}"
+      ansible_httpapi_timeout: 30

@@ -1,0 +1,30 @@
+---
+# Create one application domain when it is missing, then save once.
+# Review with --check --diff before the real run.
+#
+# ansible-playbook -i inventory.yml examples/basic/ensure_domain.yml \
+#   -e domain_name=example --check --diff
+
+- name: Ensure an application domain
+  hosts: idg
+  gather_facts: false
+
+  tasks:
+    - name: Require the domain name
+      ansible.builtin.assert:
+        that:
+          - domain_name is defined
+          - domain_name | length > 0
+        fail_msg: "Pass the domain with -e domain_name=example."
+
+    - name: Ensure the domain exists
+      gr.idg.domain:
+        name: "{{ domain_name }}"
+        state: present
+      notify: Save the domain
+
+  handlers:
+    - name: Save the domain
+      gr.idg.domain_config:
+        domain: "{{ domain_name }}"
+        state: saved

@@ -1,0 +1,19 @@
+name: Bug
+description: A module or a published example failed
+title: "[bug] "
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Collection version
+      description: Output of ansible-galaxy collection list gr.idg
+      placeholder: 1.0.0
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: Include the playbook task and the module message. Remove passwords, keys and export contents.
+    validations:
+      required: true

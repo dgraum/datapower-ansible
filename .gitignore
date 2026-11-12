@@ -1,0 +1,63 @@
+# idg-ansible — Python / Ansible collection
+
+# Secrets & credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+!**/docs/**/*.crt
+.vault_pass
+**/.vault_pass
+*.vault_pass
+credentials.json
+secrets.yml
+**/secrets.yml
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+.venv/
+.venv*/
+venv/
+env/
+*.egg
+
+# Ansible
+*.tar.gz
+.ansible/
+.ansible-tmp/
+.collections/
+*.retry
+dist/
+
+# Tests / coverage
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+.tox/
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+*~
+.DS_Store
+Thumbs.db
+
+# Logs & temp
+*.log
+tmp/
+temp/
+*.tmp

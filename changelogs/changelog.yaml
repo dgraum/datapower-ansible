@@ -1,0 +1,19 @@
+---
+releases:
+  1.0.0:
+    release_date: "2026-10-31"
+    changes:
+      release_summary: >-
+        First release of gr.idg. Modules run on the controller through
+        ansible.netcommon.httpapi.
+      major_changes:
+        - >-
+          The collection is gr.idg. Inventory holds the REST connection
+          and each module performs one operation.
+      breaking_changes:
+        - >-
+          The connection parameter was removed. Names idg_* redirect to
+          the new modules until 2.0.0.
+        - >-
+          domain_config no longer accepts state reseted. Restart the
+          domain with gr.idg.domain state restarted.

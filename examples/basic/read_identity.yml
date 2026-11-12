@@ -1,0 +1,25 @@
+---
+# Read-only. Safe first playbook for a new inventory.
+#
+# ansible-playbook -i inventory.yml examples/basic/read_identity.yml --syntax-check
+# ansible-playbook -i inventory.yml examples/basic/read_identity.yml
+
+- name: Read DataPower identity
+  hosts: idg
+  gather_facts: false
+
+  tasks:
+    - name: Read firmware, model and serial
+      gr.idg.facts:
+
+    - name: Show the identity
+      ansible.builtin.debug:
+        var: ansible_facts.datapower
+
+    - name: Read domain status
+      gr.idg.domain_status:
+      register: domain_status
+
+    - name: Show the domains
+      ansible.builtin.debug:
+        var: domain_status.domains

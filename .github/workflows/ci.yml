@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the collection
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install ansible-core
+        run: pip install "ansible-core>=2.19.0,<2.20" pytest
+
+      - name: Run unit tests
+        run: |
+          root="$RUNNER_TEMP/cols"
+          mkdir -p "$root/ansible_collections/gr"
+          ln -s "$GITHUB_WORKSPACE" "$root/ansible_collections/gr/idg"
+          PYTHONPATH="$root" pytest tests/unit -q
+
+      - name: Build and syntax-check the basic examples
+        run: |
+          ansible-galaxy collection build
+          root="$RUNNER_TEMP/installed"
+          ansible-galaxy collection install gr-idg-*.tar.gz -p "$root"
+          export ANSIBLE_COLLECTIONS_PATH="$root"
+          for playbook in examples/basic/*.yml; do
+            case "$playbook" in
+              *requirements.yml|*inventory.yml) continue ;;
+            esac
+            ansible-playbook --syntax-check -i examples/basic/inventory.yml "$playbook"
+          done

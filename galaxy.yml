@@ -1,0 +1,38 @@
+---
+namespace: gr
+name: idg
+version: 1.0.0
+readme: README.md
+authors:
+  - David Grau Merconchini <david@gallorojo.com.mx>
+description: >-
+  Ansible collection for IBM DataPower Gateway. One httpapi connection,
+  one REST client, and one task per operation.
+license:
+  - GPL-3.0-or-later
+tags:
+  - datapower
+  - idg
+  - networking
+  - security
+dependencies:
+  ansible.netcommon: ">=8.1.0"
+repository: https://github.com/dgraum/datapower-ansible
+documentation: https://github.com/dgraum/datapower-ansible
+homepage: https://github.com/dgraum/datapower-ansible
+issues: https://github.com/dgraum/datapower-ansible/issues
+build_ignore:
+  - .git
+  - .github
+  - .collections
+  - .ansible-tmp
+  - dist
+  - scripts
+  - ansible.cfg
+  - bitbucket-pipelines.yml
+  - "*.tar.gz"
+  - .venv*
+  - library
+  - __pycache__
+  - "*.pyc"
+  - .DS_Store
